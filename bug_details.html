@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Bug Details — BugTracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #1a1d24;
+    --surface3: #21242d;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --danger: #f43f5e;
+    --warn: #f59e0b;
+    --green: #10b981;
+    --text: #e2e4ea;
+    --muted: #6b7280;
+    --sidebar: 220px;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+  .sidebar { width: var(--sidebar); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 20px; position: fixed; top: 0; left: 0; bottom: 0; }
+
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .logo-icon { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: #fff; }
+
+  .nav-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; padding: 0 8px; }
+  .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 9px; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; }
+  .nav-link:hover { background: var(--surface2); color: var(--text); }
+  .nav-link.active { background: rgba(99,102,241,0.15); color: var(--accent2); }
+  .nav-link span { font-size: 16px; }
+  .sidebar-bottom { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar); flex: 1; padding: 36px 40px; }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .breadcrumb a { color: var(--muted); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--text); }
+  .breadcrumb .sep { opacity: 0.4; }
+
+  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+
+  /* Bug card */
+  .bug-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .bug-header {
+    padding: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bug-id-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .bug-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .bug-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 11px; font-family: 'DM Mono', monospace; font-weight: 500;
+    border: 1px solid;
+  }
+
+  .status-open { background: rgba(244,63,94,0.1); border-color: rgba(244,63,94,0.3); color: #fb7185; }
+  .status-in-progress { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: #fbbf24; }
+  .status-closed { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #34d399; }
+  .sev-low { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #34d399; }
+  .sev-medium { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: #fbbf24; }
+  .sev-high { background: rgba(244,63,94,0.1); border-color: rgba(244,63,94,0.3); color: #fb7185; }
+
+  .bug-desc {
+    padding: 24px 28px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #b0b4c0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Comments */
+  .comments-section { padding: 24px 28px; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+
+  .comment-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .comment-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+    flex-shrink: 0; margin-top: 2px;
+  }
+
+  .comment-body {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+
+  .comment-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .comment-author {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .comment-time {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .comment-status-tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    background: rgba(99,102,241,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(99,102,241,0.3);
+  }
+
+  .comment-text { font-size: 13px; color: #a0a6b0; line-height: 1.6; }
+
+  /* Right panel */
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeUp 0.4s 0.1s ease both;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .info-card .section-label { margin-bottom: 14px; }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+  .info-key { color: var(--muted); }
+  .info-val { color: var(--text); font-weight: 500; text-align: right; }
+
+  /* Add comment */
+  .comment-form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    outline: none;
+    resize: vertical;
+    min-height: 90px;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+  textarea::placeholder { color: #404450; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 11px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
+
+  .submit-btn:hover { background: #4f52d4; }
+
+  .pri-low { color: #34d399; }
+  .pri-medium { color: #fbbf24; }
+  .pri-high { color: #fb7185; }
+  .pri-critical { color: #ff2d55; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🐞</div>
+    <span class="logo-text">BugTracker</span>
+  </div>
+  <div>
+    <div class="nav-label">Menu</div>
+    <a href="/dashboard" class="nav-link"><span>⊞</span> Dashboard</a>
+    <a href="/view_bugs" class="nav-link active"><span>🐛</span> All Bugs</a>
+    <a href="/report_bug" class="nav-link"><span>＋</span> Report Bug</a>
+  </div>
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-link"><span>↩</span> Logout</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="breadcrumb">
+    <a href="/view_bugs">All Bugs</a>
+    <span class="sep">/</span>
+    <span>#{{ bug[0] }}</span>
+  </div>
+
+  <div class="layout">
+    <!-- Left: bug detail + comments -->
+    <div>
+      <div class="bug-card">
+        <div class="bug-header">
+          <div class="bug-id-label">Bug #{{ bug[0] }}</div>
+          <div class="bug-title">{{ bug[1] }}</div>
+          <div class="bug-meta-row">
+            <span class="badge status-{{ bug[5]|lower|replace(' ', '-') }}">
+              {% if bug[5] == 'Open' %}● {% elif bug[5] == 'In Progress' %}◑ {% else %}✓ {% endif %}
+              {{ bug[5] }}
+            </span>
+            <span class="badge sev-{{ bug[3]|lower }}">{{ bug[3] }} severity</span>
+          </div>
+        </div>
+
+        <div class="bug-desc">{{ bug[2] }}</div>
+
+        <!-- Comments -->
+        <div class="comments-section">
+          <div class="section-label">History & Comments</div>
+          {% for c in comments %}
+          <div class="comment-item">
+            <div class="comment-avatar">{{ c[3][0]|upper if c[3] else '?' }}</div>
+            <div class="comment-body">
+              <div class="comment-meta">
+                <span class="comment-author">{{ c[3] }}</span>
+                <span class="comment-time">{{ c[4] }}</span>
+                {% if c[5] %}<span class="comment-status-tag">{{ c[5] }}</span>{% endif %}
+              </div>
+              <p class="comment-text">{{ c[2] }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Add comment -->
+      <div class="comment-form-card" style="margin-top:16px;">
+        <div class="section-label">Add a Comment</div>
+        <form method="post" action="">
+          <textarea name="comment" placeholder="Write your comment, update, or note here..." required></textarea>
+          <button class="submit-btn">Post Comment →</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right: info panel -->
+    <div class="side-panel">
+      <div class="info-card">
+        <div class="section-label">Bug Details</div>
+        <div class="info-row">
+          <span class="info-key">Status</span>
+          <span class="info-val">
+            <span class="badge status-{{ bug[5]|lower|replace(' ', '-') }}">{{ bug[5] }}</span>
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Severity</span>
+          <span class="info-val">{{ bug[3] }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Priority</span>
+          <span class="info-val pri-{{ bug[4]|lower }}">{{ bug[4] }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Assigned To</span>
+          <span class="info-val">{{ bug[6] }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

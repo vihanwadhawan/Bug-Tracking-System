@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Report Bug — BugTracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #1a1d24;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --text: #e2e4ea;
+    --muted: #6b7280;
+    --sidebar: 220px;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+  .sidebar { width: var(--sidebar); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 20px; position: fixed; top: 0; left: 0; bottom: 0; }
+
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .logo-icon { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: #fff; }
+
+  .nav-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; padding: 0 8px; }
+  .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 9px; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; }
+  .nav-link:hover { background: var(--surface2); color: var(--text); }
+  .nav-link.active { background: rgba(99,102,241,0.15); color: var(--accent2); }
+  .nav-link span { font-size: 16px; }
+  .sidebar-bottom { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+
+  .main { margin-left: var(--sidebar); flex: 1; padding: 36px 40px; display: flex; flex-direction: column; align-items: flex-start; }
+
+  .page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: #fff; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    width: 100%;
+    max-width: 620px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .form-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  input, textarea, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+  }
+
+  input::placeholder, textarea::placeholder { color: #404450; }
+  textarea { resize: vertical; min-height: 100px; }
+
+  select option { background: #1a1d24; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 8px;
+  }
+
+  .submit-btn:hover { background: #4f52d4; }
+  .submit-btn:active { transform: scale(0.98); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🐞</div>
+    <span class="logo-text">BugTracker</span>
+  </div>
+  <div>
+    <div class="nav-label">Menu</div>
+    <a href="/dashboard" class="nav-link"><span>⊞</span> Dashboard</a>
+    <a href="/view_bugs" class="nav-link"><span>🐛</span> All Bugs</a>
+    <a href="/report_bug" class="nav-link active"><span>＋</span> Report Bug</a>
+  </div>
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-link"><span>↩</span> Logout</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-title">Report a Bug</div>
+  <p class="page-sub">Fill in the details below to create a new bug report</p>
+
+  <div class="form-card">
+    <form method="post" action="/add_bug">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Bug Title</label>
+          <input name="title" placeholder="Short, descriptive title" required>
+        </div>
+
+        <div class="form-group form-full">
+          <label class="form-label">Description</label>
+          <textarea name="description" placeholder="Steps to reproduce, expected vs actual behaviour..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Severity</label>
+          <select name="severity">
+            <option value="">Select Severity</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select name="priority">
+            <option value="">Select Priority</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Critical</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Assign To</label>
+          <input name="assigned_to" placeholder="Developer name" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Deadline</label>
+          <input type="date" name="deadline" required>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <button class="submit-btn" type="submit">Submit Bug Report →</button>
+    </form>
+  </div>
+</main>
+
+</body>
+</html>
