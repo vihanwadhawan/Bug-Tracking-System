@@ -14,4 +14,4 @@ The platform maintains a complete comment and activity history for every bug, cr
 
 Designed with a professional dark-themed UI, responsive layouts, animated components, and developer-friendly navigation, the project focuses strongly on usability, scalability, and modern user experience.
 
-Unlike traditional bug management methods using spreadsheets or emails, the Bug Tracking System provides a more efficient, organized, and scalable workflow that improves collaboration, reduces issue resolution time, and enhances overall software quality!!
+Unlike traditional bug management methods using spreadsheets or emails, the Bug Tracking System provides a more efficient, organized, and scalable workflow that improves collaboration, reduces issue resolution time, and enhances the  overall software quality!!!!
